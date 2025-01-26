@@ -28,14 +28,14 @@ use crate::{
     },
 };
 
-pub const RENDEZVOUS_TIMEOUT: u64 = 12_000;
-pub const CONNECT_TIMEOUT: u64 = 18_000;
-pub const READ_TIMEOUT: u64 = 18_000;
+pub const RENDEZVOUS_TIMEOUT: u64 = 30_000;
+pub const CONNECT_TIMEOUT: u64 = 31_000;
+pub const READ_TIMEOUT: u64 = 32_000;
 // https://github.com/quic-go/quic-go/issues/525#issuecomment-294531351
 // https://datatracker.ietf.org/doc/html/draft-hamilton-early-deployment-quic-00#section-6.10
 // 15 seconds is recommended by quic, though oneSIP recommend 25 seconds,
 // https://www.onsip.com/voip-resources/voip-fundamentals/what-is-nat-keepalive
-pub const REG_INTERVAL: i64 = 15_000;
+pub const REG_INTERVAL: i64 = 600_000;
 pub const COMPRESS_LEVEL: i32 = 3;
 const SERIAL: i32 = 3;
 const PASSWORD_ENC_VERSION: &str = "00";
@@ -59,6 +59,27 @@ lazy_static::lazy_static! {
         Some(key) if !key.is_empty() => key,
         _ => "",
     }.to_owned());
+    /*
+    pub static ref RENDEZVOUS_PORT: i32 = {
+        let default_value = 6789;
+        let env_value = env::var("RENDEZVOUS_PORT")
+            .ok()
+            .and_then(|val| val.parse().ok())
+            .unwrap_or(default_value);
+        env_value
+    };
+    */
+    /*
+    pub static RENDEZVOUS_PORT: i32 = env::var("RENDEZVOUS_PORT")
+        .unwrap_or_else(|_| "21116".to_string())
+        .parse::<i32>()
+        .expect("Failed to parse RENDEZVOUS_PORT");
+
+    pub static RELAY_PORT: i32 = env::var("RELAY_PORT")
+        .unwrap_or_else(|_| "21117".to_string())
+        .parse::<i32>()
+        .expect("Failed to parse RELAY_PORT");
+    */
     pub static ref EXE_RENDEZVOUS_SERVER: RwLock<String> = Default::default();
     pub static ref APP_NAME: RwLock<String> = RwLock::new("RustDesk".to_owned());
     static ref KEY_PAIR: Mutex<Option<KeyPair>> = Default::default();
@@ -100,16 +121,31 @@ const CHARS: &[char] = &[
     'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 ];
 
-pub const RENDEZVOUS_SERVERS: &[&str] = &["rs-ny.rustdesk.com"];
-pub const PUBLIC_RS_PUB_KEY: &str = "OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=";
+pub const RENDEZVOUS_SERVERS: &[&str] = &[""];
+pub const PUBLIC_RS_PUB_KEY: &str = "";
 
 pub const RS_PUB_KEY: &str = match option_env!("RS_PUB_KEY") {
     Some(key) if !key.is_empty() => key,
     _ => PUBLIC_RS_PUB_KEY,
 };
 
-pub const RENDEZVOUS_PORT: i32 = 21116;
-pub const RELAY_PORT: i32 = 21117;
+pub const RENDEZVOUS_PORT: i32 = 10086;
+pub const RELAY_PORT: i32 = 10087;
+
+/*pub const RENDEZVOUS_PORT: i32 = match option_env!("RENDEZVOUS_PORT") {
+    Some(key) if !key.is_empty() => match key.parse::<i32>()｛
+        Ok(value) => value,
+        _ => 21116
+        ｝
+    _ => 21116,
+};
+
+
+pub const RELAY_PORT: i32 = match option_env!("RELAY_PORT") {
+    Some(key) if !key.is_empty() => key.parse::<i32>()？,
+    _ => 21117,
+};
+*/
 
 macro_rules! serde_field_string {
     ($default_func:ident, $de_func:ident, $default_expr:expr) => {
@@ -946,7 +982,7 @@ impl Config {
     }
 
     pub fn set_options(mut v: HashMap<String, String>) {
-        Self::purify_options(&mut v);
+        //Self::purify_options(&mut v);
         let mut config = CONFIG2.write().unwrap();
         if config.options == v {
             return;
@@ -970,9 +1006,11 @@ impl Config {
     }
 
     pub fn set_option(k: String, v: String) {
+        /*
         if !is_option_can_save(&OVERWRITE_SETTINGS, &k, &DEFAULT_SETTINGS, &v) {
             return;
         }
+        */
         let mut config = CONFIG2.write().unwrap();
         let v2 = if v.is_empty() { None } else { Some(&v) };
         if v2 != config.options.get(&k) {
@@ -1391,6 +1429,13 @@ impl PeerConfig {
             keys::OPTION_I444,
             keys::OPTION_SWAP_LEFT_RIGHT_MOUSE,
             keys::OPTION_COLLAPSE_TOOLBAR,
+            // add option by fireworld
+            keys::OPTION_SHOW_QUALITY_MONITOR,
+            keys::OPTION_DISABLE_AUDIO,
+            keys::OPTION_DIRECT_SERVER,
+            keys::OPTION_ENABLE_CHECK_UPDATE,
+            keys::OPTION_HIDE_PROXY_SETTINGS,
+            keys::OPTION_HIDE_SERVER_SETTINGS,
         ]
         .map(|key| {
             mp.insert(key.to_owned(), UserDefaultConfig::read(key));
@@ -1578,9 +1623,11 @@ impl LocalConfig {
     }
 
     pub fn set_option(k: String, v: String) {
+        /*
         if !is_option_can_save(&OVERWRITE_LOCAL_SETTINGS, &k, &DEFAULT_LOCAL_SETTINGS, &v) {
             return;
         }
+        */
         let mut config = LOCAL_CONFIG.write().unwrap();
         // The custom client will explictly set "default" as the default language.
         let is_custom_client_default_lang = k == keys::OPTION_LANGUAGE && v == "default";
@@ -1716,9 +1763,9 @@ impl UserDefaultConfig {
             keys::OPTION_VIEW_STYLE => self.get_string(key, "original", vec!["adaptive"]),
             keys::OPTION_SCROLL_STYLE => self.get_string(key, "scrollauto", vec!["scrollbar"]),
             keys::OPTION_IMAGE_QUALITY => {
-                self.get_string(key, "balanced", vec!["best", "low", "custom"])
+                self.get_string(key, "low", vec!["best", "low", "custom", "balanced"])
             }
-            keys::OPTION_CODEC_PREFERENCE => {
+            keys:: OPTION_CODEC_PREFERENCE => {
                 self.get_string(key, "auto", vec!["vp8", "vp9", "av1", "h264", "h265"])
             }
             keys::OPTION_CUSTOM_IMAGE_QUALITY => {
@@ -1726,6 +1773,11 @@ impl UserDefaultConfig {
             }
             keys::OPTION_CUSTOM_FPS => self.get_double_string(key, 30.0, 5.0, 120.0),
             keys::OPTION_ENABLE_FILE_COPY_PASTE => self.get_string(key, "Y", vec!["", "N"]),
+            // add some option by fireworld
+            keys::OPTION_DISABLE_AUDIO => self.get_string(key, "Y", vec!["", "N"]),
+            keys::OPTION_SHOW_QUALITY_MONITOR => self.get_string(key, "Y", vec!["", "N"]),
+            keys::OPTION_DIRECT_SERVER => self.get_string(key, "Y", vec!["", "N"]),
+            keys::OPTION_ENABLE_CHECK_UPDATE => self.get_string(key, "N", vec!["", "Y"]),
             _ => self
                 .get_after(key)
                 .map(|v| v.to_string())
@@ -1734,6 +1786,7 @@ impl UserDefaultConfig {
     }
 
     pub fn set(&mut self, key: String, value: String) {
+        /*
         if !is_option_can_save(
             &OVERWRITE_DISPLAY_SETTINGS,
             &key,
@@ -1742,6 +1795,7 @@ impl UserDefaultConfig {
         ) {
             return;
         }
+        */
         if value.is_empty() {
             self.options.remove(&key);
         } else {
@@ -2387,6 +2441,7 @@ pub mod keys {
         OPTION_ENABLE_DIRECTX_CAPTURE,
         OPTION_ENABLE_ANDROID_SOFTWARE_ENCODING_HALF_SCALE,
         OPTION_ENABLE_TRUSTED_DEVICES,
+        OPTION_DISABLE_AUDIO,
     ];
 
     // BUILDIN_SETTINGS
