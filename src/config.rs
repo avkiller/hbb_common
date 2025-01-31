@@ -59,16 +59,12 @@ lazy_static::lazy_static! {
         Some(key) if !key.is_empty() => key,
         _ => "",
     }.to_owned());
-    /*
-    pub static ref RENDEZVOUS_PORT: i32 = {
-        let default_value = 1234;
-        let env_value = env::var("RENDEZVOUS_PORT")
-            .ok()
-            .and_then(|val| val.parse().ok())
-            .unwrap_or(default_value);
-        env_value
-    };
-    */
+
+    // pub static ref RENDEZVOUS_PORT: Lazy<i32> = Lazy::new(|| {
+    //     option_env!("RENDEZVOUS_PORT")
+    //     .and_then(|val| val.parse::<i32>().ok())
+    //     .unwrap_or(10086)
+    // });
     /*
     pub static RENDEZVOUS_PORT: i32 = env::var("RENDEZVOUS_PORT")
         .unwrap_or_else(|_| "21116".to_string())
