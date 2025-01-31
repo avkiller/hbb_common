@@ -61,7 +61,7 @@ lazy_static::lazy_static! {
     }.to_owned());
     /*
     pub static ref RENDEZVOUS_PORT: i32 = {
-        let default_value = 6789;
+        let default_value = 1234;
         let env_value = env::var("RENDEZVOUS_PORT")
             .ok()
             .and_then(|val| val.parse().ok())
