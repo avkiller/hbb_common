@@ -358,6 +358,12 @@ pub struct PeerConfig {
         deserialize_with = "PeerConfig::deserialize_trackpad_speed"
     )]
     pub trackpad_speed: i32,
+    #[serde(
+        rename = "trackpad-speed",
+        default = "PeerConfig::default_trackpad_speed",
+        deserialize_with = "PeerConfig::deserialize_trackpad_speed"
+    )]
+    pub trackpad_speed: i32,
 
     #[serde(
         default,
@@ -411,6 +417,7 @@ impl Default for PeerConfig {
             displays_as_individual_windows: Self::default_displays_as_individual_windows(),
             use_all_my_displays_for_the_remote_session:
                 Self::default_use_all_my_displays_for_the_remote_session(),
+            trackpad_speed: Self::default_trackpad_speed(),
             trackpad_speed: Self::default_trackpad_speed(),
             custom_resolutions: Default::default(),
             options: Self::default_options(),
@@ -1592,6 +1599,24 @@ impl PeerConfig {
             Ok(Self::default_trackpad_speed())
         }
     }
+
+    fn default_trackpad_speed() -> i32 {
+        UserDefaultConfig::read(keys::OPTION_TRACKPAD_SPEED)
+            .parse()
+            .unwrap_or(100)
+    }
+
+    fn deserialize_trackpad_speed<'de, D>(deserializer: D) -> Result<i32, D::Error>
+    where
+        D: de::Deserializer<'de>,
+    {
+        let v: i32 = de::Deserialize::deserialize(deserializer)?;
+        if v >= 10 && v <= 1000 {
+            Ok(v)
+        } else {
+            Ok(Self::default_trackpad_speed())
+        }
+    }
 }
 
 serde_field_bool!(
@@ -1920,6 +1945,8 @@ impl UserDefaultConfig {
             }
             keys::OPTION_CUSTOM_IMAGE_QUALITY => self.get_num_string(key, 50.0, 10.0, 0xFFF as f64),
             keys::OPTION_CUSTOM_FPS => self.get_num_string(key, 30.0, 5.0, 120.0),
+            keys::OPTION_CUSTOM_IMAGE_QUALITY => self.get_num_string(key, 50.0, 10.0, 0xFFF as f64),
+            keys::OPTION_CUSTOM_FPS => self.get_num_string(key, 30.0, 5.0, 120.0),
             keys::OPTION_ENABLE_FILE_COPY_PASTE => self.get_string(key, "Y", vec!["", "N"]),
 	    keys::OPTION_TRACKPAD_SPEED => self.get_num_string(key, 100, 10, 1000),
             // add some option by fireworld
@@ -1973,8 +2000,13 @@ impl UserDefaultConfig {
     where
         T: ToString + std::str::FromStr + std::cmp::PartialOrd + std::marker::Copy,
     {
+    fn get_num_string<T>(&self, key: &str, default: T, min: T, max: T) -> String
+    where
+        T: ToString + std::str::FromStr + std::cmp::PartialOrd + std::marker::Copy,
+    {
         match self.get_after(key) {
             Some(option) => {
+                let v: T = option.parse().unwrap_or(default);
                 let v: T = option.parse().unwrap_or(default);
                 if v >= min && v <= max {
                     v.to_string()
@@ -2386,6 +2418,11 @@ pub fn use_ws() -> bool {
     option2bool(option, &Config::get_option(option))
 }
 
+pub fn use_ws() -> bool {
+    let option = keys::OPTION_ALLOW_WEBSOCKET;
+    option2bool(option, &Config::get_option(option))
+}
+
 pub mod keys {
     pub const OPTION_VIEW_ONLY: &str = "view_only";
     pub const OPTION_SHOW_MONITORS_TOOLBAR: &str = "show_monitors_toolbar";
@@ -2462,6 +2499,7 @@ pub mod keys {
     pub const OPTION_API_SERVER: &str = "api-server";
     pub const OPTION_KEY: &str = "key";
     pub const OPTION_ALLOW_WEBSOCKET: &str = "allow-websocket";
+    pub const OPTION_ALLOW_WEBSOCKET: &str = "allow-websocket";
     pub const OPTION_PRESET_ADDRESS_BOOK_NAME: &str = "preset-address-book-name";
     pub const OPTION_PRESET_ADDRESS_BOOK_TAG: &str = "preset-address-book-tag";
     pub const OPTION_ENABLE_DIRECTX_CAPTURE: &str = "enable-directx-capture";
@@ -2469,6 +2507,7 @@ pub mod keys {
         "enable-android-software-encoding-half-scale";
     pub const OPTION_ENABLE_TRUSTED_DEVICES: &str = "enable-trusted-devices";
     pub const OPTION_AV1_TEST: &str = "av1-test";
+    pub const OPTION_TRACKPAD_SPEED: &str = "trackpad-speed";
     pub const OPTION_TRACKPAD_SPEED: &str = "trackpad-speed";
 
     // buildin options
@@ -2482,6 +2521,8 @@ pub mod keys {
     pub const OPTION_HIDE_NETWORK_SETTINGS: &str = "hide-network-settings";
     pub const OPTION_HIDE_SERVER_SETTINGS: &str = "hide-server-settings";
     pub const OPTION_HIDE_PROXY_SETTINGS: &str = "hide-proxy-settings";
+    pub const OPTION_HIDE_REMOTE_PRINTER_SETTINGS: &str = "hide-remote-printer-settings";
+    pub const OPTION_HIDE_WEBSOCKET_SETTINGS: &str = "hide-websocket-settings";
     pub const OPTION_HIDE_REMOTE_PRINTER_SETTINGS: &str = "hide-remote-printer-settings";
     pub const OPTION_HIDE_WEBSOCKET_SETTINGS: &str = "hide-websocket-settings";
     pub const OPTION_HIDE_USERNAME_ON_CARD: &str = "hide-username-on-card";
@@ -2557,6 +2598,7 @@ pub mod keys {
         OPTION_CODEC_PREFERENCE,
         OPTION_SYNC_INIT_CLIPBOARD,
         OPTION_TRACKPAD_SPEED,
+        OPTION_TRACKPAD_SPEED,
     ];
     // DEFAULT_LOCAL_SETTINGS, OVERWRITE_LOCAL_SETTINGS
     pub const KEYS_LOCAL_SETTINGS: &[&str] = &[
@@ -2627,6 +2669,7 @@ pub mod keys {
         OPTION_API_SERVER,
         OPTION_KEY,
         OPTION_ALLOW_WEBSOCKET,
+        OPTION_ALLOW_WEBSOCKET,
         OPTION_PRESET_ADDRESS_BOOK_NAME,
         OPTION_PRESET_ADDRESS_BOOK_TAG,
         OPTION_ENABLE_DIRECTX_CAPTURE,
@@ -2647,6 +2690,8 @@ pub mod keys {
         OPTION_HIDE_NETWORK_SETTINGS,
         OPTION_HIDE_SERVER_SETTINGS,
         OPTION_HIDE_PROXY_SETTINGS,
+        OPTION_HIDE_REMOTE_PRINTER_SETTINGS,
+        OPTION_HIDE_WEBSOCKET_SETTINGS,
         OPTION_HIDE_REMOTE_PRINTER_SETTINGS,
         OPTION_HIDE_WEBSOCKET_SETTINGS,
         OPTION_HIDE_USERNAME_ON_CARD,
