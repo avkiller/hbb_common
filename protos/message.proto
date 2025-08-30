@@ -556,6 +556,16 @@ message CliprdrFileContentsResponse {
 message CliprdrTryEmpty {
 }
 
+// Clipobard file message for audit.
+message CliprdrFile {
+  string name = 1;
+  uint64 size = 2;
+}
+
+message CliprdrFiles {
+  repeated CliprdrFile files = 1;
+}
+
 message Cliprdr {
   oneof union {
     CliprdrMonitorReady ready = 1;
@@ -566,6 +576,7 @@ message Cliprdr {
     CliprdrFileContentsRequest file_contents_request = 6;
     CliprdrFileContentsResponse file_contents_response = 7;
     CliprdrTryEmpty try_empty = 8;
+    CliprdrFiles files = 9;
   }
 }
 
@@ -677,6 +688,7 @@ message OptionMessage {
   BoolOption follow_remote_window = 16;
   BoolOption disable_camera = 17;
   BoolOption terminal_persistent = 18;
+  BoolOption show_my_cursor = 19;
 }
 
 message TestDelay {
