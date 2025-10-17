@@ -1069,6 +1069,10 @@ impl Config {
             if config.options.remove(&k).is_some() {
                 config.store();
             }
+            let mut config = CONFIG2.write().unwrap();
+            if config.options.remove(&k).is_some() {
+                config.store();
+            }
             return;
         }
         */
@@ -1857,6 +1861,10 @@ impl LocalConfig {
             if config.options.remove(&k).is_some() {
                 config.store();
             }
+            let mut config = LOCAL_CONFIG.write().unwrap();
+            if config.options.remove(&k).is_some() {
+                config.store();
+            }
             return;
         }
         */
@@ -2025,6 +2033,9 @@ impl UserDefaultConfig {
             &DEFAULT_DISPLAY_SETTINGS,
             &value,
         ) {
+            if self.options.remove(&key).is_some() {
+                self.store();
+            }
             if self.options.remove(&key).is_some() {
                 self.store();
             }
@@ -2559,6 +2570,12 @@ pub mod keys {
     pub const OPTION_PRESET_DEVICE_USERNAME: &str = "preset-device-username";
     pub const OPTION_PRESET_DEVICE_NAME: &str = "preset-device-name";
     pub const OPTION_PRESET_NOTE: &str = "preset-note";
+    pub const OPTION_PRESET_ADDRESS_BOOK_ALIAS: &str = "preset-address-book-alias";
+    pub const OPTION_PRESET_ADDRESS_BOOK_PASSWORD: &str = "preset-address-book-password";
+    pub const OPTION_PRESET_ADDRESS_BOOK_NOTE: &str = "preset-address-book-note";
+    pub const OPTION_PRESET_DEVICE_USERNAME: &str = "preset-device-username";
+    pub const OPTION_PRESET_DEVICE_NAME: &str = "preset-device-name";
+    pub const OPTION_PRESET_NOTE: &str = "preset-note";
     pub const OPTION_ENABLE_DIRECTX_CAPTURE: &str = "enable-directx-capture";
     pub const OPTION_ENABLE_ANDROID_SOFTWARE_ENCODING_HALF_SCALE: &str =
         "enable-android-software-encoding-half-scale";
@@ -2566,6 +2583,11 @@ pub mod keys {
     pub const OPTION_AV1_TEST: &str = "av1-test";
     pub const OPTION_TRACKPAD_SPEED: &str = "trackpad-speed";
     pub const OPTION_REGISTER_DEVICE: &str = "register-device";
+    pub const OPTION_RELAY_SERVER: &str = "relay-server";
+    pub const OPTION_SHOW_VIRTUAL_MOUSE: &str = "show-virtual-mouse";
+    // joystick is the virtual mouse.
+    // So `OPTION_SHOW_VIRTUAL_MOUSE` should also be set if `OPTION_SHOW_VIRTUAL_JOYSTICK` is set.
+    pub const OPTION_SHOW_VIRTUAL_JOYSTICK: &str = "show-virtual-joystick";
     pub const OPTION_RELAY_SERVER: &str = "relay-server";
     pub const OPTION_SHOW_VIRTUAL_MOUSE: &str = "show-virtual-mouse";
     // joystick is the virtual mouse.
@@ -2705,6 +2727,9 @@ pub mod keys {
         OPTION_TOUCH_MODE,
         OPTION_SHOW_VIRTUAL_MOUSE,
         OPTION_SHOW_VIRTUAL_JOYSTICK,
+        OPTION_TOUCH_MODE,
+        OPTION_SHOW_VIRTUAL_MOUSE,
+        OPTION_SHOW_VIRTUAL_JOYSTICK,
     ];
     // DEFAULT_SETTINGS, OVERWRITE_SETTINGS
     pub const KEYS_SETTINGS: &[&str] = &[
@@ -2747,6 +2772,12 @@ pub mod keys {
         OPTION_ALLOW_WEBSOCKET,
         OPTION_PRESET_ADDRESS_BOOK_NAME,
         OPTION_PRESET_ADDRESS_BOOK_TAG,
+        OPTION_PRESET_ADDRESS_BOOK_ALIAS,
+        OPTION_PRESET_ADDRESS_BOOK_PASSWORD,
+        OPTION_PRESET_ADDRESS_BOOK_NOTE,
+        OPTION_PRESET_DEVICE_USERNAME,
+        OPTION_PRESET_DEVICE_NAME,
+        OPTION_PRESET_NOTE,
         OPTION_PRESET_ADDRESS_BOOK_ALIAS,
         OPTION_PRESET_ADDRESS_BOOK_PASSWORD,
         OPTION_PRESET_ADDRESS_BOOK_NOTE,
