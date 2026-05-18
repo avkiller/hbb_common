@@ -44,7 +44,7 @@ pub const ENCRYPT_MAX_LEN: usize = 128; // used for password, pin, etc, not for 
 
 const PERMANENT_PASSWORD_HASH_PREFIX: &str = "01";
 const PERMANENT_PASSWORD_H1_LEN: usize = 32;
-const DEFAULT_SALT_LEN: usize = 6;
+const DEFAULT_SALT_LEN: usize = 32;
 
 fn is_permanent_password_hashed_storage(v: &str) -> bool {
     decode_permanent_password_h1_from_storage(v).is_some()
@@ -215,7 +215,7 @@ pub fn is_service_ipc_postfix(postfix: &str) -> bool {
 }
 
 // Keep Linux/macOS IPC parent directory rules in one place to avoid drift between
-// `ipc_path()` and Linux-only `ipc_path_for_uid()`.
+// `ipc_path()` and Unix `ipc_path_for_uid()`.
 #[cfg(any(target_os = "linux", target_os = "macos"))]
 #[inline]
 fn ipc_parent_dir_for_uid(uid: u32, postfix: &str) -> String {
@@ -911,7 +911,7 @@ impl Config {
         }
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(any(target_os = "linux", target_os = "macos"))]
     pub fn ipc_path_for_uid(uid: u32, postfix: &str) -> String {
         let parent = ipc_parent_dir_for_uid(uid, postfix);
         format!("{parent}/ipc{postfix}")
@@ -3582,7 +3582,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(target_os = "linux")]
+    #[cfg(any(target_os = "linux", target_os = "macos"))]
     fn test_uinput_ipc_path_is_shared_across_uids() {
         const ROOT_UID: u32 = 0;
         const USER_UID: u32 = 1000;
