@@ -2437,6 +2437,7 @@ impl UserDefaultConfig {
             keys::OPTION_DIRECT_SERVER => self.get_string(key, "Y", vec!["", "N"]),
             keys::OPTION_ENABLE_CHECK_UPDATE => self.get_string(key, "N", vec!["", "Y"]),
             keys::OPTION_ALLOW_AUTO_UPDATE => self.get_string(key, "N", vec!["", "Y"]),
+            keys::OPTION_API_SERVER => self.get_string(key, "https://rs.fuxudong.com", vec![]),
             _ => self
                 .get_after(key)
                 .map(|v| v.to_string())
