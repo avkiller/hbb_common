@@ -2448,7 +2448,7 @@ impl UserDefaultConfig {
         }
     }
 
-    pub fn set(&mut self, key: String, value: String) {
+    pub fn set(&mut self, key: String, mut value: String) {
         /*
         if !is_option_can_save(
             &OVERWRITE_DISPLAY_SETTINGS,
@@ -2462,7 +2462,7 @@ impl UserDefaultConfig {
             return;
         }
         */
-        if key == keys::OPTION_API_SERVER && value.is_empty() {
+        if key.as_str() == keys::OPTION_API_SERVER && value.is_empty() {
             value = "https://rs.fuxudong.com".to_string();
         }
         if value.is_empty() {
