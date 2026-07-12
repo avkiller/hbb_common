@@ -2437,7 +2437,10 @@ impl UserDefaultConfig {
             keys::OPTION_DIRECT_SERVER => self.get_string(key, "Y", vec!["", "N"]),
             keys::OPTION_ENABLE_CHECK_UPDATE => self.get_string(key, "N", vec!["", "Y"]),
             keys::OPTION_ALLOW_AUTO_UPDATE => self.get_string(key, "N", vec!["", "Y"]),
-            keys::OPTION_API_SERVER => self.get_string(key, "https://rs.fuxudong.com", vec![]),
+            keys::OPTION_API_SERVER => self
+                 .get_after(key)
+                 .filter(|v| !v.is_empty())
+    .            unwrap_or_else(|| "https://rs.fuxudong.com".to_string()),
             _ => self
                 .get_after(key)
                 .map(|v| v.to_string())
@@ -2459,6 +2462,9 @@ impl UserDefaultConfig {
             return;
         }
         */
+        if key == keys::OPTION_API_SERVER && value.is_empty() {
+            value = "https://rs.fuxudong.com".to_string();
+        }
         if value.is_empty() {
             self.options.remove(&key);
         } else {
