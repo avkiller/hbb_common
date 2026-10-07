@@ -2431,9 +2431,6 @@ impl UserDefaultConfig {
             return;
         }
         */
-        if key.as_str() == keys::OPTION_API_SERVER && value.is_empty() {
-            value = "https://rs.fuxudong.com".to_string();
-        }
         if value.is_empty() {
             self.options.remove(&key);
         } else {
