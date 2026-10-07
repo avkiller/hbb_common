@@ -147,14 +147,6 @@ pub const RELAY_PORT: i32 = 10087;
 pub const WS_RENDEZVOUS_PORT: i32 = 10088;
 pub const WS_RELAY_PORT: i32 = 10089;
 
-
-
-pub const RELAY_PORT: i32 = match option_env!("RELAY_PORT") {
-    Some(key) if !key.is_empty() => key.parse::<i32>()？,
-    _ => 21117,
-};
-*/
-
 #[inline]
 pub fn is_service_ipc_postfix(postfix: &str) -> bool {
     // `_service` is a protected cross-user IPC channel used by the root service.
