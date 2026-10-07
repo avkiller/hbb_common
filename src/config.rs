@@ -147,13 +147,6 @@ pub const RELAY_PORT: i32 = 10087;
 pub const WS_RENDEZVOUS_PORT: i32 = 10088;
 pub const WS_RELAY_PORT: i32 = 10089;
 
-/*pub const RENDEZVOUS_PORT: i32 = match option_env!("RENDEZVOUS_PORT") {
-    Some(key) if !key.is_empty() => match key.parse::<i32>()｛
-        Ok(value) => value,
-        _ => 21116
-        ｝
-    _ => 21116,
-};
 
 
 pub const RELAY_PORT: i32 = match option_env!("RELAY_PORT") {
@@ -2029,13 +2022,6 @@ impl PeerConfig {
             keys::OPTION_I444,
             keys::OPTION_SWAP_LEFT_RIGHT_MOUSE,
             keys::OPTION_COLLAPSE_TOOLBAR,
-            // add option by fireworld
-            keys::OPTION_SHOW_QUALITY_MONITOR,
-            keys::OPTION_DISABLE_AUDIO,
-            keys::OPTION_DIRECT_SERVER,
-            keys::OPTION_ENABLE_CHECK_UPDATE,
-            keys::OPTION_HIDE_PROXY_SETTINGS,
-            keys::OPTION_HIDE_SERVER_SETTINGS,
         ]
         .map(|key| {
             mp.insert(key.to_owned(), UserDefaultConfig::read(key));
@@ -2429,15 +2415,9 @@ impl UserDefaultConfig {
             keys::OPTION_EDGE_SCROLL_EDGE_THICKNESS => self.get_num_string(key, 100, 20, 150),
             keys::OPTION_TRACKPAD_SPEED => self.get_num_string(key, 100, 10, 1000),
             // add some option by fireworld
-            keys::OPTION_DISABLE_AUDIO => self.get_string(key, "Y", vec!["", "N"]),
-            keys::OPTION_SHOW_QUALITY_MONITOR => self.get_string(key, "Y", vec!["", "N"]),
+            // keys::OPTION_DISABLE_AUDIO => self.get_string(key, "Y", vec!["", "N"]),
+            // keys::OPTION_SHOW_QUALITY_MONITOR => self.get_string(key, "Y", vec!["", "N"]),
             keys::OPTION_DIRECT_SERVER => self.get_string(key, "Y", vec!["", "N"]),
-            keys::OPTION_ENABLE_CHECK_UPDATE => self.get_string(key, "N", vec!["", "Y"]),
-            keys::OPTION_ALLOW_AUTO_UPDATE => self.get_string(key, "N", vec!["", "Y"]),
-            keys::OPTION_API_SERVER => self
-                 .get_after(key)
-                 .filter(|v| !v.is_empty())
-    .            unwrap_or_else(|| "https://rs.fuxudong.com".to_string()),
             _ => self
                 .get_after(key)
                 .map(|v| v.to_string())
